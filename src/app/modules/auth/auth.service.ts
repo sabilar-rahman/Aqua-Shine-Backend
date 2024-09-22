@@ -7,6 +7,7 @@ import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
 import { createRefreshToken } from "./auth.index";
+import httpStatus from "http-status";
 
 // ============================================================
 // Authentication Services
@@ -136,8 +137,64 @@ const refreshToken = async (refreshToken: string) => {
   };
 };
 
+const getAllUserFromDB = async () => {
+  const users = await UserModel.find({});
+  return users;
+};
+
+// Update a user's role by userId
+const updateUserRoleIntoDB = async (
+  userId: string,
+  newRole: "admin" | "user"
+) => {
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  user.role = newRole;
+  await user.save();
+  return user;
+};
+
+// const updateUserInfoIntoBD = async (
+//   id: string,
+//   updatedData: Partial<TUser>
+// ) => {
+//   const user = await UserModel.findByIdAndUpdate(id, updatedData, {
+//     new: true, // Return the updated user
+//     runValidators: true, // Ensure validation is run on the updated data
+//   });
+
+//   // If no user is found, throw a "User not found" error
+//   if (!user) {
+//     throw new AppError(httpStatus.NOT_FOUND, "User not found");
+//   }
+
+//   return user; // Return the updated user data
+// };
+
+const updateUserInfoIntoDB = async (id: string, updateInfo: Partial<TUser>) => {
+  // Find the user by ID and update their information
+
+  const updatedUser = await UserModel.findByIdAndUpdate(id, updateInfo, {
+    new: true,
+    runValidators: true,
+  });
+
+  // If no user is found, throw a "User not found" error
+  if (!updatedUser) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  return updatedUser;
+};
+
 export const AuthServices = {
   registeredUserIntoDB,
   loginUser,
   refreshToken,
+
+  getAllUserFromDB,
+  updateUserRoleIntoDB,
+  updateUserInfoIntoDB,
 };

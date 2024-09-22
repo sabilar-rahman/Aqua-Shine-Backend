@@ -1,3 +1,4 @@
+import httpStatus from "http-status";
 import config from "../../config";
 import catchAsync from "../utils/catchAsync";
 import sendResponse from "../utils/sendResponse";
@@ -67,13 +68,64 @@ const refreshToken = catchAsync(async (req, res) => {
   const refreshToken = req.cookies['refreshToken']
   const result = await AuthServices.refreshToken(refreshToken)
   sendResponse(res, {
-    statusCode: 200,
+    statusCode: httpStatus.OK,
     success: true,
     message: "Access token refreshed successfully!",
     token: result?.accessToken,
     data: result?.user
   });
 })
+
+
+const getAllUsers = catchAsync(async (req, res) => {
+
+  const users = await AuthServices.getAllUserFromDB();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "All users fetched successfully!",
+    data: users
+  })
+
+});
+
+
+const updateUserRole = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+
+  const updatedUser = await AuthServices.updateUserRoleIntoDB(userId, role);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User role updated successfully!",
+    data: updatedUser
+
+  })
+
+});
+
+
+const updateUserInfo = catchAsync(async (req, res) => {
+  const id = req.params.id;
+  const updateInfo = req.body
+
+  const updatedUser = await AuthServices.updateUserInfoIntoDB(id, updateInfo);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User info updated successfully!",
+    data: updatedUser
+  })
+});
+
+
+
+
+
+
 
 
 
@@ -87,5 +139,8 @@ const refreshToken = catchAsync(async (req, res) => {
 export const AuthControllers = {
   registeredUser,
   loginUser,
-  refreshToken
+  refreshToken,
+  getAllUsers,
+  updateUserRole,
+  updateUserInfo
 };

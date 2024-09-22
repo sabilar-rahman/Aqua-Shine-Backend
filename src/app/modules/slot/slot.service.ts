@@ -77,11 +77,23 @@ const getSingleSlotServiceById = async (id: string) => {
 };
 
 
+const updateSlot = async (id: string, updatedData: Partial<TSlot>) => {
+  const slot = await SlotModel.findByIdAndUpdate(id, updatedData, {
+    new: true,
+  });
+  if (!slot) {
+    throw new AppError(httpStatus.NOT_FOUND, "Slot not found");
+  }
+  return slot;
+};
+
+
 
 
 
 export const SlotServices = {
   createSlotServiceIntoDB,
   getAllSlotServiceFromDB,
-  getSingleSlotServiceById
+  getSingleSlotServiceById,
+  updateSlot
 };

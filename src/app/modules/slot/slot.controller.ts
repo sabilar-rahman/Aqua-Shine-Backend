@@ -37,7 +37,34 @@ const getAllSlot = catchAsync(async (req, res) => {
   });
 });
 
+// update slot
+// const updateSlot = catchAsync(async (req: Request, res: Response) => {
+//   const slotId = req.params.id;
+//   const updatedData = req.body;
+//   const slot = await SlotServices.updateSlot(slotId, updatedData);
+
+//   res.status(200).json({
+//     success: true,
+//     status: httpStatus.OK,
+//     message: "slot updated successfully",
+//     data: slot,
+//   });
+// });
+
+const updateSlot = catchAsync(async (req, res) => {
+  const slotId = req.params.id;
+  const updatedData = req.body;
+  const slot = await SlotServices.updateSlot(slotId, updatedData);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "slot updated successfully",
+    data: slot,
+  });
+});
+
 export const SlotController = {
   createSlot,
   getAllSlot,
+  updateSlot,
 };
