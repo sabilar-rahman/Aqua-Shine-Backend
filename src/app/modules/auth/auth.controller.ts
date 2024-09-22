@@ -1,3 +1,4 @@
+import config from "../../config";
 import catchAsync from "../utils/catchAsync";
 import sendResponse from "../utils/sendResponse";
 import { AuthServices } from "./auth.service";
@@ -45,7 +46,14 @@ const loginUser = catchAsync(async (req, res) => {
   // 1. Authenticate User and Generate Access Token
   // ------------------------------------------------------------
   const result = await AuthServices.loginUser(req.body);
-  const { accessToken, user } = result;
+  // const { accessToken, user } = result;
+
+  const { accessToken, user, refreshToken } = result
+
+  res.cookie('refreshToken', refreshToken, {
+    secure: config.NODE_ENV === 'production',
+    httpOnly: true,
+  })
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -55,6 +63,23 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+const refreshToken = catchAsync(async (req, res) => {
+  const refreshToken = req.cookies['refreshToken']
+  const result = await AuthServices.refreshToken(refreshToken)
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Access token refreshed successfully!",
+    token: result?.accessToken,
+    data: result?.user
+  });
+})
+
+
+
+
+
+
 // ============================================================
 // Export Auth Controllers
 // ============================================================
@@ -62,4 +87,5 @@ const loginUser = catchAsync(async (req, res) => {
 export const AuthControllers = {
   registeredUser,
   loginUser,
+  refreshToken
 };

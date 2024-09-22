@@ -11,7 +11,7 @@ import { TUserRole } from "../modules/user/user.interface";
 /**
  * Middleware to authenticate users based on their roles.
  *
- * This function verifies the JWT token provided by the client and checks 
+ * This function verifies the JWT token provided by the client and checks
  * if the user has the required role(s) to access the resource.
  *
  * Key functionalities:
@@ -42,6 +42,22 @@ const auth = (...userRoles: TUserRole[]) => {
       token,
       config.jwt_access_secret as string
     ) as JwtPayload;
+
+    // ------------------------------------------------------------
+    // 2.2 handling the JWT verification errors while keeping the main structure intact. 
+
+    
+
+    // let decoded;
+    // try {
+    //   decoded = jwt.verify(
+    //     token,
+    //     config.jwt_access_secret as string
+    //   ) as JwtPayload;
+    // } catch (error) {
+    //   throw new AppError(401, "You are not authorized");
+    // }
+
     // ------------------------------------------------------------
     // 3. Check if User Role is Authorized
     // ------------------------------------------------------------

@@ -11,10 +11,22 @@ const createServiceIntoDB = async (payload: TService) => {
 };
 
 // Retrieve Only Non-Deleted Documents: Always query with { isDeleted: false } to avoid showing deleted items.
-
+// ----------------------------------------------------------------------------
 // get all services
-const getAllServicesFromDB = async () => {
-  const result = await Service.find({ isDeleted: false });
+// ----------------------------------------------------------------------------
+
+// const getAllServicesFromDB = async () => {
+//   const result = await Service.find({ isDeleted: false });
+//   return result;
+// };
+
+const getAllServicesFromDB = async (query: Record<string, unknown>) => {
+  const searchFieldName = ["name", "description", "price"];
+  const result = await Service.find(
+    { isDeleted: false },
+    query,
+    searchFieldName
+  );
   return result;
 };
 

@@ -19,8 +19,19 @@ const createService = catchAsync(async (req: Request, res: Response) => {
 
 // get all services
 
+
+// interface IServiceQuery {
+//   name?: string;
+//   category?: string;
+//   price?: number;
+//   // Add any other query parameters you expect here
+// }
+
 const getAllServices = catchAsync(async (req: Request, res: Response) => {
-  const result = await ServiceOfServices.getAllServicesFromDB();
+
+  const  serviceQuery = req.query;
+  
+  const result = await ServiceOfServices.getAllServicesFromDB(serviceQuery);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -47,7 +58,10 @@ const getSingleService = catchAsync(async (req: Request, res: Response) => {
 const updateSingleService = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const serviceBody = req.body;
-  const result = await ServiceOfServices.updateSingleServiceFromDB(id, serviceBody);
+  const result = await ServiceOfServices.updateSingleServiceFromDB(
+    id,
+    serviceBody
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -66,15 +80,12 @@ const deleteSingleService = catchAsync(async (req: Request, res: Response) => {
     message: "Service deleted successfully",
     data: result,
   });
-})
-
-
-
+});
 
 export const ServiceController = {
   createService,
   getAllServices,
   getSingleService,
   updateSingleService,
-  deleteSingleService
+  deleteSingleService,
 };

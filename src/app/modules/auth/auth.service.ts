@@ -4,8 +4,9 @@ import { UserModel } from "../user/user.model";
 import status from "http-status";
 import { TLoginUser } from "./auth.interface";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import config from "../../config";
+import { createRefreshToken } from "./auth.index";
 
 // ============================================================
 // Authentication Services
@@ -77,15 +78,60 @@ const loginUser = async (payload: TLoginUser) => {
   };
 
   // Generate the JWT access token with expiration
-  const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
-    expiresIn: config.jwt_access_expires_in,
-  });
+  // const accessToken = jwt.sign(jwtPayload, config.jwt_access_secret as string, {
+  //   expiresIn: config.jwt_access_expires_in,
+  // });
+
+  const accessToken = createRefreshToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string
+  );
+
+  const refreshToken = createRefreshToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string
+  );
 
   // ------------------------------------------------------------
   // 4. Return Access Token and User Info
   // ------------------------------------------------------------
   return {
     accessToken: accessToken,
+    refreshToken: refreshToken,
+    user,
+  };
+};
+
+const refreshToken = async (refreshToken: string) => {
+  const result = (await jwt.verify(
+    refreshToken,
+    config.jwt_refresh_secret as string
+  )) as JwtPayload;
+
+  console.log(result);
+
+  const { userEmail } = result;
+
+  const user = await UserModel.findOne({ email: userEmail });
+  if (!user) {
+    throw new AppError(status.NOT_FOUND, "User does not exist!");
+  }
+  const jwtPayload = {
+    userEmail: user?.email,
+    role: user?.role,
+  };
+
+  const accessToken = createRefreshToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string
+  );
+
+  return {
+    accessToken,
+
     user,
   };
 };
@@ -93,4 +139,5 @@ const loginUser = async (payload: TLoginUser) => {
 export const AuthServices = {
   registeredUserIntoDB,
   loginUser,
+  refreshToken,
 };
