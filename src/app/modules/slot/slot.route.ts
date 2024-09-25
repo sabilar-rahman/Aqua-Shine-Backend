@@ -13,6 +13,11 @@ const router = Router();
 //   SlotController.createSlot
 // );
 
-router.get("/availability", SlotController.getAllSlot);
+
+
+
+// router.get("/availability", SlotController.getAllSlot);
+
+router.get("/availability/:serviceId", SlotController.getAllSlot);
 
 export const SlotRoutes = router;

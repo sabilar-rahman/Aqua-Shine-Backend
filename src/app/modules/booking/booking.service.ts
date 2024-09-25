@@ -12,23 +12,7 @@ import mongoose from "mongoose";
 // Booking Services
 // ============================================================
 
-/**
- * Creates a booking in the database.
- *
- * This function initiates a database transaction to create a booking and
- * update the slot status. It ensures that the customer, service, and slot
- * exist, and that the slot is available before proceeding with the booking.
- *
- * Key functionalities:
- * - Check if the user (customer) exists
- * - Validate the service and slot availability
- * - Create a booking and update the slot status in a single transaction
- *
- * @param {TBooking} payload - The booking data
- * @param {JwtPayload} user - The authenticated user's details (customer)
- * @returns {Promise<Booking>} - The newly created booking
- * @throws {AppError} - If any validation fails (customer, service, slot, etc.)
- */
+
 
 const createBookingIntoDB = async (payload: TBooking, user: JwtPayload) => {
   const session = await mongoose.startSession();
@@ -106,20 +90,6 @@ const createBookingIntoDB = async (payload: TBooking, user: JwtPayload) => {
     throw err;
   }
 };
-/**
- *
- * Retrieves all bookings from the database.
- *
- * This function fetches all bookings and populates the customer, service,
- * and slot fields to return detailed booking information.
- *
- * Key functionalities:
- * - Fetch all bookings from the `BookingModel`
- * - Populate the customer, service, and slot details
- *
- *
- * @returns {Promise<Booking[]>} - An array of all bookings with details
- */
 
 const getAllBookingsFromDB = async () => {
   // ------------------------------------------------------------
@@ -132,20 +102,6 @@ const getAllBookingsFromDB = async () => {
   return result;
 };
 
-/**
- * Retrieves bookings for a specific user (customer) from the database.
- *
- * This function fetches all bookings made by a specific user and populates
- * the customer, service, and slot fields for detailed information.
- *
- * Key functionalities:
- * - Find the user by email
- * - Fetch the user's bookings from the `BookingModel`
- * - Populate the customer, service, and slot details
- *
- * @param {JwtPayload} user - The authenticated user's details (customer)
- * @returns {Promise<Booking[]>} - An array of the user's bookings with details
- */
 
 const getUserBookingsFromDB = async (user: JwtPayload) => {
   // ------------------------------------------------------------
@@ -165,8 +121,15 @@ const getUserBookingsFromDB = async (user: JwtPayload) => {
   return result;
 };
 
+
+const getBookingsByUserEmail = async (email: string) => {
+  const bookings = await BookingModel.find({ "customer.email": email }).exec();
+  return bookings;
+};
+
 export const BookingServices = {
   createBookingIntoDB,
   getAllBookingsFromDB,
   getUserBookingsFromDB,
+  getBookingsByUserEmail
 };

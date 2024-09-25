@@ -131,8 +131,23 @@ const getUserBookings = catchAsync(async (req, res) => {
 });
 
 
+const getBookingsByEmail = catchAsync(async (req, res) => {
+  const email = req.params.email; // Assuming email is passed as a URL parameter
+  const bookings = await BookingServices.getBookingsByUserEmail(email);
+
+  res.status(200).json({
+    status: httpStatus.OK,
+    message: "Bookings retrieved successfully",
+    success: true,
+    data: bookings,
+  });
+});
+
+
+
 export const BookingController = {
   createBooking,
   getAllBooking,
   getUserBookings,
+  getBookingsByEmail
 };

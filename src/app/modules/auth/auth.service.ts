@@ -83,6 +83,7 @@ const loginUser = async (payload: TLoginUser) => {
   //   expiresIn: config.jwt_access_expires_in,
   // });
 
+
   const accessToken = createRefreshToken(
     jwtPayload,
     config.jwt_access_secret as string,
@@ -105,37 +106,70 @@ const loginUser = async (payload: TLoginUser) => {
   };
 };
 
-const refreshToken = async (refreshToken: string) => {
-  const result = (await jwt.verify(
-    refreshToken,
-    config.jwt_refresh_secret as string
-  )) as JwtPayload;
 
-  console.log(result);
+// Refresh token here , 
 
-  const { userEmail } = result;
+// const refreshToken = async (refreshToken: string) => {
+//   const result = (await jwt.verify(
+//     refreshToken,
+//     config.jwt_refresh_secret as string
+//   )) as JwtPayload;
 
-  const user = await UserModel.findOne({ email: userEmail });
+//   console.log(result);
+
+//   const { userEmail } = result;
+
+//   const user = await UserModel.findOne({ email: userEmail });
+//   if (!user) {
+//     throw new AppError(status.NOT_FOUND, "User does not exist!");
+//   }
+//   const jwtPayload = {
+//     userEmail: user?.email,
+//     role: user?.role,
+//   };
+
+//   const accessToken = createRefreshToken(
+//     jwtPayload,
+//     config.jwt_access_secret as string,
+//     config.jwt_access_expires_in as string
+//   );
+
+//   return {
+//     accessToken,
+
+//     user,
+//   };
+// };
+
+
+const refreshToken = async (token: string) => {
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload
+  console.log(decoded)
+  const { userEmail } = decoded
+  const user = await UserModel.findOne({ email: userEmail })
   if (!user) {
-    throw new AppError(status.NOT_FOUND, "User does not exist!");
+    throw new AppError(status.NOT_FOUND, 'User does not exists!')
   }
+
   const jwtPayload = {
     userEmail: user?.email,
     role: user?.role,
-  };
-
+  }
   const accessToken = createRefreshToken(
     jwtPayload,
     config.jwt_access_secret as string,
-    config.jwt_access_expires_in as string
-  );
-
+    config.jwt_access_expires_in as string,
+  )
   return {
     accessToken,
+  }
+}
 
-    user,
-  };
-};
+
+
 
 const getAllUserFromDB = async () => {
   const users = await UserModel.find({});

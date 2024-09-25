@@ -26,7 +26,9 @@ const createSlot = catchAsync(async (req, res) => {
 // ────────────────────────────────────────────────────────────────────────────────
 const getAllSlot = catchAsync(async (req, res) => {
   // 1. Fetch all available slots from the database using query parameters
-  const result = await SlotServices.getAllSlotServiceFromDB(req.query);
+  const { serviceId } = req.params
+  const query = req.query
+  const result = await SlotServices.getAllSlotServiceFromDB(query, serviceId);
 
   // 2. Send a successful response with the retrieved slot data
   sendResponse(res, {
@@ -36,6 +38,7 @@ const getAllSlot = catchAsync(async (req, res) => {
     data: result,
   });
 });
+
 
 // update slot
 // const updateSlot = catchAsync(async (req: Request, res: Response) => {

@@ -20,6 +20,7 @@ const createServiceIntoDB = async (payload: TService) => {
 //   return result;
 // };
 
+
 const getAllServicesFromDB = async (query: Record<string, unknown>) => {
   const searchFieldName = ["name", "description", "price"];
   const result = await Service.find(

@@ -49,12 +49,12 @@ const loginUser = catchAsync(async (req, res) => {
   const result = await AuthServices.loginUser(req.body);
   // const { accessToken, user } = result;
 
-  const { accessToken, user, refreshToken } = result
+  const { accessToken, user, refreshToken } = result;
 
-  res.cookie('refreshToken', refreshToken, {
-    secure: config.NODE_ENV === 'production',
+  res.cookie("refreshToken", refreshToken, {
+    secure: config.NODE_ENV === "development",
     httpOnly: true,
-  })
+  });
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -64,32 +64,29 @@ const loginUser = catchAsync(async (req, res) => {
   });
 });
 
+// refresh token implemented here , for future use
+
 const refreshToken = catchAsync(async (req, res) => {
-  const refreshToken = req.cookies['refreshToken']
-  const result = await AuthServices.refreshToken(refreshToken)
+  const refreshToken = req.cookies;
+  const result = await AuthServices.refreshToken(refreshToken);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "Access token refreshed successfully!",
-    token: result?.accessToken,
-    data: result?.user
+    data: result,
   });
-})
-
+});
 
 const getAllUsers = catchAsync(async (req, res) => {
-
   const users = await AuthServices.getAllUserFromDB();
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "All users fetched successfully!",
-    data: users
-  })
-
+    data: users,
+  });
 });
-
 
 const updateUserRole = catchAsync(async (req, res) => {
   const { userId } = req.params;
@@ -101,36 +98,22 @@ const updateUserRole = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     success: true,
     message: "User role updated successfully!",
-    data: updatedUser
-
-  })
-
+    data: updatedUser,
+  });
 });
-
 
 const updateUserInfo = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const updateInfo = req.body
+  const updateInfo = req.body;
 
   const updatedUser = await AuthServices.updateUserInfoIntoDB(id, updateInfo);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
     message: "User info updated successfully!",
-    data: updatedUser
-  })
+    data: updatedUser,
+  });
 });
-
-
-
-
-
-
-
-
-
-
-
 
 // ============================================================
 // Export Auth Controllers
@@ -142,5 +125,5 @@ export const AuthControllers = {
   refreshToken,
   getAllUsers,
   updateUserRole,
-  updateUserInfo
+  updateUserInfo,
 };
