@@ -40,7 +40,6 @@ const bookingSchema = new Schema<TBooking>(
     registrationPlate: {
       type: String,
       required: true,
-      unique: true,
     },
   },
   { timestamps: true },

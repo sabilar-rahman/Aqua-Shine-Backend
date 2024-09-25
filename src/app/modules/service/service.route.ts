@@ -31,12 +31,13 @@ router.put(
 router.delete("/:id",auth(USER_ROLE.admin), ServiceController.deleteSingleService);
 
 
-// create slot for service
-router.post(
-  "/slots",auth(USER_ROLE.admin),
-  ValidateRequest(SlotValidations.slotCreateValidationSchema),
-  SlotController.createSlot
-);
+// create slot for service |||| its removed now and redirected to slot route
+
+// router.post(
+//   "/slots",auth(USER_ROLE.admin),
+//   ValidateRequest(SlotValidations.slotCreateValidationSchema),
+//   SlotController.createSlot
+// );
 
 
 

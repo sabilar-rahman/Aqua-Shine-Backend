@@ -4,7 +4,7 @@ import sendResponse from "../utils/sendResponse";
 
 import { BookingServices } from "./booking.service";
 import { TBooking } from "./booking.interface";
-
+import crypto from 'crypto'
 
 // ============================================================
 // Booking Controllers
@@ -35,6 +35,10 @@ const createBooking = catchAsync(async (req, res) => {
   // 1. Extract Booking Details from Request Body
   // ------------------------------------------------------------
   const {
+    cus_name,
+    cus_email,
+    cus_phone,
+    amount,
     serviceId: service,
     slotId: slot,
     vehicleType,
@@ -61,13 +65,39 @@ const createBooking = catchAsync(async (req, res) => {
   // ------------------------------------------------------------
   // 3. Create Booking and Populate Related Fields
   // ------------------------------------------------------------
-  const result = await (
-    await (
-      await (
-        await BookingServices.createBookingIntoDB(modifiedObj, user)
-      ).populate('customer')
-    ).populate('service')
-  ).populate('slot')
+ 
+  const modifiedPaymentObj = {
+    cus_name,
+    cus_email,
+    cus_phone,
+    amount,
+    tran_id: crypto.randomBytes(16).toString('hex'),
+    signature_key: 'dbb74894e82415a2f7ff0ec3a97e4183',
+    store_id: 'aamarpaytest',
+    currency: 'BDT',
+    desc: 'Service Booking',
+    cus_add1: 'House 50, Road 5, Block kha, Mirpur-1, Dhaka,',
+    cus_add2: 'Patuakhali,',
+    cus_city: 'Dhaka',
+    cus_country: 'Bangladesh',
+    success_url: `http://localhost:5000/payment/success`,
+    fail_url: `http://localhost:5000/payment/success`,
+    cancel_url: `http://localhost:5000/payment/successk`,
+    type: 'json',
+  }
+ 
+  // const result = await (
+  //   await (
+  //     await (
+  //       await BookingServices.createBookingIntoDB(modifiedObj, user)
+  //     ).populate('customer')
+  //   ).populate('service')
+  // ).populate('slot')
+  const result = await BookingServices.createBookingIntoDB(
+    modifiedObj,
+    user,
+    modifiedPaymentObj,
+  )
   sendResponse(res, {
     statusCode: 200,
     success: true,

@@ -8,88 +8,185 @@ import { TBooking } from "./booking.interface";
 import { BookingModel } from "./booking.model";
 import mongoose from "mongoose";
 
+import axios from 'axios'
 // ============================================================
 // Booking Services
 // ============================================================
 
 
 
-const createBookingIntoDB = async (payload: TBooking, user: JwtPayload) => {
-  const session = await mongoose.startSession();
+// const createBookingIntoDB = async (payload: TBooking, user: JwtPayload ,formData: any,) => {
+//   const session = await mongoose.startSession();
 
+//   try {
+//     session.startTransaction();
+
+//     // ------------------------------------------------------------
+//     // 1. Find Customer (User) from the Database
+//     // ------------------------------------------------------------
+//     const customer = await UserModel.findOne({ email: user?.userEmail });
+//     const customerId = customer?._id;
+
+//     // Check if the customer exists
+//     if (!customer) {
+//       throw new AppError(404, "Customer not found");
+//     }
+
+//     // ------------------------------------------------------------
+//     // 2. Validate Service Exists and Is Available
+//     // ------------------------------------------------------------
+//     const serviceId: any = payload?.service;
+//     const service = await Service.isServiceExists(serviceId);
+
+//     // Check if the service exists
+//     if (!service) {
+//       throw new AppError(404, "Service not found!");
+//     }
+
+//     // Check if the service is deleted
+//     if (service.isDeleted) {
+//       throw new AppError(400, "Unable to book, service is deleted");
+//     }
+
+//     // ------------------------------------------------------------
+//     // 3. Validate Slot Exists and Is Available
+//     // ------------------------------------------------------------
+//     const isSlotExists = await SlotModel.findById(payload.slot);
+
+//     // Check if the slot exists
+//     if (!isSlotExists) {
+//       throw new AppError(404, "Slot not found!");
+//     }
+
+//     // Check if the slot is already booked
+//     if (isSlotExists.isBooked === "booked") {
+//       throw new AppError(404, "Slot is already booked!");
+//     }
+
+//     // ------------------------------------------------------------
+//     // 4. Create Booking and Update Slot Status in a Transaction
+//     // ------------------------------------------------------------
+//     // Create the booking (transaction-1)
+//     // const [booking] = await BookingModel.create(
+//     //   [{ ...payload, customer: customerId }],
+//     //   { session }
+//     // );
+
+//      // make payment
+
+//      const { data } = await axios.post(
+//       'https://secure.aamarpay.com/jsonpost.php',
+//       formData,
+//     )
+
+//     if (data.result) {
+//       //creating booking- transaction-1
+//       const [booking] = await BookingModel.create(
+//         [{ ...payload, customer: customerId }],
+//         { session },
+//       )
+//     }
+
+
+
+
+
+
+
+//     // Update the slot's status to 'booked' (transaction-2)
+//     await SlotModel.findByIdAndUpdate(
+//       payload.slot,
+//       { isBooked: "booked" },
+//       { new: true, session }
+//     );
+
+//     // Commit the transaction
+//     await session.commitTransaction();
+//     await session.endSession();
+
+//     // return booking;
+//     return data;
+
+
+//   } catch (err) {
+//     // Abort the transaction in case of error
+//     await session.abortTransaction();
+//     await session.endSession();
+//     throw err;
+//   }
+// };
+
+const createBookingIntoDB = async (
+  payload: TBooking,
+  user: JwtPayload,
+  formData: any,
+) => {
+  const session = await mongoose.startSession()
   try {
-    session.startTransaction();
-
-    // ------------------------------------------------------------
-    // 1. Find Customer (User) from the Database
-    // ------------------------------------------------------------
-    const customer = await UserModel.findOne({ email: user?.userEmail });
-    const customerId = customer?._id;
-
-    // Check if the customer exists
+    session.startTransaction()
+    //find user from db
+    const customer = await UserModel.findOne({ email: user?.userEmail })
+    const customerId = customer?._id
+    //check user is exists or not
     if (!customer) {
-      throw new AppError(404, "Customer not found");
+      throw new AppError(404, 'Customer not found')
     }
-
-    // ------------------------------------------------------------
-    // 2. Validate Service Exists and Is Available
-    // ------------------------------------------------------------
-    const serviceId: any = payload?.service;
-    const service = await Service.isServiceExists(serviceId);
-
-    // Check if the service exists
+    //check is service exists or not
+    const serviceId: any = payload?.service
+    const service = await Service.isServiceExists(serviceId)
     if (!service) {
-      throw new AppError(404, "Service not found!");
+      throw new AppError(404, 'Service not found!')
     }
-
-    // Check if the service is deleted
+    // check service deleted or not
     if (service.isDeleted) {
-      throw new AppError(400, "Unable to book, service is deleted");
+      throw new AppError(400, 'Unable to book, service is deleted')
     }
-
-    // ------------------------------------------------------------
-    // 3. Validate Slot Exists and Is Available
-    // ------------------------------------------------------------
-    const isSlotExists = await SlotModel.findById(payload.slot);
-
-    // Check if the slot exists
+    //check slots exists or not
+    const isSlotExists = await SlotModel.findById(payload.slot)
     if (!isSlotExists) {
-      throw new AppError(404, "Slot not found!");
+      throw new AppError(404, 'Slot not found!')
+    }
+    //check slots is booked or available
+    if (isSlotExists.isBooked === 'booked') {
+      throw new AppError(404, 'Slot is already booked!')
+    }
+    // make payment
+
+    const { data } = await axios.post(
+      'https://secure.aamarpay.com/jsonpost.php',
+      formData,
+    )
+
+    if (data.result) {
+      //creating booking- transaction-1
+      const [booking] = await BookingModel.create(
+        [{ ...payload, customer: customerId }],
+        { session },
+      )
     }
 
-    // Check if the slot is already booked
-    if (isSlotExists.isBooked === "booked") {
-      throw new AppError(404, "Slot is already booked!");
-    }
-
-    // ------------------------------------------------------------
-    // 4. Create Booking and Update Slot Status in a Transaction
-    // ------------------------------------------------------------
-    // Create the booking (transaction-1)
-    const [booking] = await BookingModel.create(
-      [{ ...payload, customer: customerId }],
-      { session }
-    );
-
-    // Update the slot's status to 'booked' (transaction-2)
+    //updating slot status: transaction-2
     await SlotModel.findByIdAndUpdate(
       payload.slot,
-      { isBooked: "booked" },
-      { new: true, session }
-    );
+      { isBooked: 'booked' },
+      { new: true, session },
+    )
 
-    // Commit the transaction
-    await session.commitTransaction();
-    await session.endSession();
-
-    return booking;
+    await session.commitTransaction()
+    await session.endSession()
+    return data
   } catch (err) {
-    // Abort the transaction in case of error
-    await session.abortTransaction();
-    await session.endSession();
-    throw err;
+    await session.abortTransaction()
+    await session.endSession()
+    throw err
   }
-};
+}
+
+
+
+
+
+
 
 const getAllBookingsFromDB = async () => {
   // ------------------------------------------------------------

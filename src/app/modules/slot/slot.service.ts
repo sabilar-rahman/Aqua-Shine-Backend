@@ -75,25 +75,33 @@ const createSlotServiceIntoDB = async (payload: TSlot) => {
 
 // serviceId added to query
 
-const getAllSlotServiceFromDB = async (query: Record<string, unknown>, serviceId: string) => {
-  // 1. Define fields that can be used for searching
-  const searchAbleFields = ["date"];
+// const getAllSlotServiceFromDB = async (query: Record<string, unknown>, serviceId: string) => {
+//   // 1. Define fields that can be used for searching
+//   const searchAbleFields = ["date"];
 
-  // 2. Build and execute the query to retrieve available slots
-  const result = await buildQuery(
-    SlotModel.find({ isBooked: "available",service: serviceId  }).populate("service"),
-    query,
-    searchAbleFields
-  );
+//   // 2. Build and execute the query to retrieve available slots
+//   const result = await buildQuery(
+//     SlotModel.find({ isBooked: "available",service: serviceId  }).populate("service"),
+//     query,
+//     searchAbleFields
+//   );
 
-  // 3. Return a message if no slots are found
-  if (result.length === 0) {
-    return "No slots available at this moment!";
-  }
+//   // 3. Return a message if no slots are found
+//   if (result.length === 0) {
+//     return "No slots available at this moment!";
+//   }
 
-  // 4. Return the retrieved slots
-  return result;
-};
+//   // 4. Return the retrieved slots
+//   return result;
+// };
+
+
+const getAllSlotServiceFromDB = async () => {
+  const result = await SlotModel.find().populate('service')
+  return result
+}
+
+
 
 
 
@@ -108,15 +116,29 @@ const getSingleSlotServiceById = async (id: string) => {
 };
 
 
-const updateSlot = async (id: string, updatedData: Partial<TSlot>) => {
-  const slot = await SlotModel.findByIdAndUpdate(id, updatedData, {
+const updateSlot = async (id: string, payload: Partial<TSlot>) => {
+  const slot = await SlotModel.findByIdAndUpdate(id, payload, {
     new: true,
+    runValidators: true,
   });
   if (!slot) {
     throw new AppError(httpStatus.NOT_FOUND, "Slot not found");
   }
   return slot;
 };
+
+
+const getAvailableSlotsFromDB = async (query: Record<string, unknown>, serviceId: string) => {
+  const searchAbleFields = ["date"];
+  const result = await buildQuery(
+    SlotModel.find({ isBooked: "available", service: serviceId }).populate("service"),
+    query,
+    searchAbleFields
+  );
+  return result
+}
+
+
 
 
 
@@ -126,6 +148,7 @@ export const SlotServices = {
   createSlotServiceIntoDB,
   getAllSlotServiceFromDB,
   getSingleSlotServiceById,
+  updateSlot,
 
-  updateSlot
+  getAvailableSlotsFromDB
 };
