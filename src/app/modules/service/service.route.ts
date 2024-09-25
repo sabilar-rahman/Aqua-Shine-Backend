@@ -21,8 +21,9 @@ router.get("/", ServiceController.getAllServices);
 
 router.get("/:id", ServiceController.getSingleService);
 
+// update added by me
 router.put(
-  "/:id",auth(USER_ROLE.admin),
+  "/update/:id",auth(USER_ROLE.admin),
   ValidateRequest(serviceValidation.serviceUpdateValidationSchema),
   ServiceController.updateSingleService
 );
